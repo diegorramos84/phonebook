@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/persons')
 
 app.use(express.json())
 app.use(cors())
@@ -16,36 +18,16 @@ morgan.token('body', function getBody (req, res) {
 
 app.use(morgan(':method :url :status - :response-time ms :body'))
 
-let persons = [
-  {
-    "id": 1,
-    "name": "Arto Hellas",
-    "number": "040-123456"
-  },
-  {
-    "id": 2,
-    "name": "Ada Lovelace",
-    "number": "39-44-5323523"
-  },
-  {
-    "id": 3,
-    "name": "Dan Abramov",
-    "number": "12-43-234345"
-  },
-  {
-    "id": 4,
-    "name": "Mary Poppendieck",
-    "number": "39-23-6423122"
-  }
-]
-
-
 app.get('/' , (request, response) => {
   response.send('<h1>Hello World </h1>')
 })
 
 app.get('/api/persons' , (request, response) => {
-  response.json(persons)
+  console.log(response)
+  console.log('Listing all contacts')
+  Person.find({}).then(person => {
+    response.json(person)
+  })
 })
 
 app.get('/api/persons/:id' , (request, response) => {
@@ -83,15 +65,15 @@ app.delete('/api/persons/:id' , (request, response) => {
   }
 })
 
-const idGenerator = () => {
-  const id = Math.floor(Math.random() * 99999)
-  return id
-}
+// const idGenerator = () => {
+//   const id = Math.floor(Math.random() * 99999)
+//   return id
+// }
 
-const checkName = (name) => {
-  const findPerson = persons.map(person => person.name).includes(name)
-  return findPerson
-}
+// const checkName = (name) => {
+//   const findPerson = persons.map(person => person.name).includes(name)
+//   return findPerson
+// }
 
 app.post('/api/persons' , (request, response) => {
   const body = request.body
@@ -108,24 +90,22 @@ app.post('/api/persons' , (request, response) => {
     })
   }
 
-  if (checkName(body.name)) {
-    return response.status(400).json({
-      error: 'name must be unique'})
-  }
+  // if (checkName(body.name)) {
+  //   return response.status(400).json({
+  //     error: 'name must be unique'})
+  // }
 
-  const person = {
-    id: idGenerator(),
+  const person = new Person ({
     name: body.name,
     number: body.number,
-  }
+  })
 
-  persons = persons.concat(person)
-
-  response.json(person)
-
+  person.save().then(savedPeson => {
+    response.json(person)
+  })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
