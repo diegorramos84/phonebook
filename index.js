@@ -52,17 +52,12 @@ app.get('/api/persons/:id' , (request, response) => {
     `)
 })
 
-app.delete('/api/persons/:id' , (request, response) => {
-  const id = Number(request.params.id)
-  person = persons.find(person => person.id === id)
-  persons = persons.filter(person => person.id !== id)
-
-  if (person) {
-    response.status(204).end()
-  } else {
-    statusMessage = 'This person dont exist in the database'
-    response.status(404).end()
-  }
+app.delete('/api/persons/:id' , (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 // const idGenerator = () => {
@@ -75,20 +70,10 @@ app.delete('/api/persons/:id' , (request, response) => {
 //   return findPerson
 // }
 
-app.post('/api/persons' , (request, response) => {
+app.post('/api/persons' , (request, response, next) => {
   const body = request.body
 
-  if (!body.name) { // check if there is a name in the body post request
-    return response.status(400).json({
-      error: 'name missing'
-    })
-  }
-
-  if (!body.number) { // check if there is a number in the body post request
-    return response.status(400).json({
-      error: 'number missing'
-    })
-  }
+  // Person.findByOneAndUpdate(body.name)
 
   // if (checkName(body.name)) {
   //   return response.status(400).json({
@@ -103,7 +88,21 @@ app.post('/api/persons' , (request, response) => {
   person.save().then(savedPeson => {
     response.json(person)
   })
+  .catch(error => next(error))
 })
+
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
