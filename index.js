@@ -32,25 +32,27 @@ app.get('/api/persons' , (request, response) => {
 })
 
 app.get('/api/persons/:id' , (request, response) => {
-  const id = Number(request.params.id)
-  let person = persons.find(person => person.id === id)
-
-  if (person) {
-     response.json(person)
-    } else {
-      response.statusMessage = "This user id does not exist"
-      response.status(404).end()
-    }
+  Person.findById(request.params.id)
+    .then(result => {
+      if(result) {
+        response.json(result)
+      } else {
+        response.statusMessage = "This user id does not exist"
+        response.status(404).end()
+      }
+    })
   })
 
   app.get('/info' , (request, response) => {
-    const phonebook = persons.length
-    let date = new Date()
-    console.log(date)
-    response.send(`
-    <p>Phonebook has info for ${phonebook} people</p>
-    <p>${date}</p>
-    `)
+    Person.find({})
+      .then(result => {
+        let phonebook = result.length
+        let date = new Date()
+        response.send(`
+        <p>Phonebook has info for ${phonebook} people</p>
+        <p>${date}</p>
+        `)
+      })
 })
 
 app.delete('/api/persons/:id' , (request, response, next) => {
@@ -61,25 +63,8 @@ app.delete('/api/persons/:id' , (request, response, next) => {
     .catch(error => next(error))
 })
 
-// const idGenerator = () => {
-//   const id = Math.floor(Math.random() * 99999)
-//   return id
-// }
-
-// const checkName = (name) => {
-//   const findPerson = persons.map(person => person.name).includes(name)
-//   return findPerson
-// }
-
 app.post('/api/persons' , (request, response, next) => {
   const body = request.body
-
-  // Person.findByOneAndUpdate(body.name)
-
-  // if (checkName(body.name)) {
-  //   return response.status(400).json({
-  //     error: 'name must be unique'})
-  // }
 
   const person = new Person ({
     name: body.name,
