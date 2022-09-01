@@ -12,7 +12,7 @@ app.use(express.static('build'))
 
 
 morgan.token('body', function getBody (req, res) {
-  if (req.method === "POST") {
+  if (req.method === 'POST') {
     return JSON.stringify(req.body)
   }
 })
@@ -37,22 +37,22 @@ app.get('/api/persons/:id' , (request, response) => {
       if(result) {
         response.json(result)
       } else {
-        response.statusMessage = "This user id does not exist"
+        response.statusMessage = 'This user id does not exist'
         response.status(404).end()
       }
     })
-  })
+})
 
-  app.get('/info' , (request, response) => {
-    Person.find({})
-      .then(result => {
-        let phonebook = result.length
-        let date = new Date()
-        response.send(`
-        <p>Phonebook has info for ${phonebook} people</p>
-        <p>${date}</p>
-        `)
-      })
+app.get('/info' , (request, response) => {
+  Person.find({})
+    .then(result => {
+      let phonebook = result.length
+      let date = new Date()
+      response.send(`
+      <p>Phonebook has info for ${phonebook} people</p>
+      <p>${date}</p>
+      `)
+    })
 })
 
 app.delete('/api/persons/:id' , (request, response, next) => {
@@ -74,15 +74,15 @@ app.post('/api/persons' , (request, response, next) => {
   person.save().then(savedPeson => {
     response.json(person)
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id' , (request, response, next) => {
-  const {name, number} = request.body
+  const { name, number } = request.body
 
   Person.findByIdAndUpdate(
     request.params.id,
-    {name, number},
+    { name, number },
     { new: true, runValidators: true, context:'query' })
     .then(updatedPerson => {
       response.json(updatedPerson)
@@ -101,7 +101,7 @@ const errorHandler = (error, request, response, next) => {
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
-    return response.status(400).send( { error: error.message})
+    return response.status(400).send( { error: error.message })
   }
 
   next(error)

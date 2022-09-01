@@ -51,15 +51,15 @@ mongoose
       //     })
       //     mongoose.connection.close()
       //   } else {
-          console.log('Adding new contact')
-          const person = new Person({
-            name: process.argv[3],
-            number: process.argv[4]
-          })
-          console.log(person)
-          person.save().then(result => {
-            console.log(`${person.name} contact saved`)
-            mongoose.connection.close()
-          })
-        }
+      console.log('Adding new contact')
+      const person = new Person({
+        name: process.argv[3],
+        number: process.argv[4]
       })
+      console.log(person)
+      person.save().then(result => {
+        console.log(`${person.name} contact saved`)
+        mongoose.connection.close()
+      })
+    }
+  })
